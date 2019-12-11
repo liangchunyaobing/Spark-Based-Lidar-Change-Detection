@@ -22,48 +22,48 @@ def subdomain(subdomain):
 def subdomainBuffer(voxel):
     x,y,z=int(voxel[0][0]//d),int(voxel[0][1]//d),int(voxel[0][2]//d)
     s=[((x,y,z),voxel)]
-    d1,d2,d3=int(voxel[0][0]%d),int(voxel[0][0]%d),int(voxel[0][0]%d)
-    if d1==1:
+    d1,d2,d3=int(voxel[0][0]%d),int(voxel[0][1]%d),int(voxel[0][2]%d)
+    if d1==0:
         s.append(((x-1,y,z),voxel))
-        if d2==1:
+        if d2==0:
             s.append(((x-1,y-1,z),voxel))
-            if d3==1:
+            if d3==0:
                 s.append(((x-1,y-1,z-1),voxel))
             elif d3==d-1:
                 s.append(((x-1,y-1,z+1),voxel))
         elif d2==d-1:
             s.append(((x-1,y+1,z),voxel))
-            if d3==1:
+            if d3==0:
                 s.append(((x-1,y+1,z-1),voxel))
             elif d3==d-1:
                 s.append(((x-1,y+1,z+1),voxel))
     elif d1==d-1:
         s.append(((x+1,y,z),voxel))
-        if d2==1:
+        if d2==0:
             s.append(((x+1,y-1,z),voxel))
-            if d3==1:
+            if d3==0:
                 s.append(((x+1,y-1,z-1),voxel))
             elif d3==d-1:
                 s.append(((x+1,y-1,z+1),voxel))
         elif d2==d-1:
             s.append(((x+1,y+1,z),voxel))
-            if d3==1:
+            if d3==0:
                 s.append(((x+1,y+1,z-1),voxel))
             elif d3==d-1:
                 s.append(((x+1,y+1,z+1),voxel))
-    if d2==1:
+    if d2==0:
         s.append(((x,y-1,z),voxel))
-        if d3==1:
+        if d3==0:
             s.append(((x,y-1,z-1),voxel))
         elif d3==d-1:
             s.append(((x,y-1,z+1),voxel))
     elif d2==d-1:
         s.append(((x,y+1,z),voxel))
-        if d3==1:
+        if d3==0:
             s.append(((x,y+1,z-1),voxel))
         elif d3==d-1:
             s.append(((x,y+1,z+1),voxel))
-    if d3==1:
+    if d3==0:
         s.append(((x,y,z-1),voxel))
     elif d3==d-1:
         s.append(((x,y,z+1),voxel))
@@ -85,7 +85,7 @@ def changeDetect(subdomain):
                 voxelCount=0
                 for voxel2 in subdomain[1][1]:
                     xv2,yv2,zv2=voxel2[0][0],voxel2[0][1],voxel2[0][2]
-                    if abs(xv2-xv1)<=1 and abs(yv2-yv1)<=1 and abs(zv2-zv1)<=1:
+                    if abs(xv2-xv1)<1.5 and abs(yv2-yv1)<1.5 and abs(zv2-zv1)<1.5:
                         voxelCount+=1
                         for point1 in voxel1[1]:
                             if len(point1)<4:
@@ -93,16 +93,16 @@ def changeDetect(subdomain):
                                 for point2 in voxel2[1]:
                                     x2,y2,z2=point2[0],point2[1],point2[2]
                                     dist=(x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1)
-                                    if dist<dMin:
+                                    if dist<1:
                                         point1.append(0)
                                         pointCount+=1                            
                                         break
                     if pointCount==pointNumber or voxelCount==27:
-                        break
+                       break
                 if pointCount!=pointNumber:
                     for point1 in voxel1[1]:
-                        if len(point1)<4:
-                            point1.append(1)    
+                         if len(point1)<4:
+                             point1.append(1)    
     return subdomain[1][0]          
 # add .txt at the end of output file
 def renameFile(filepath):
@@ -114,7 +114,7 @@ def renameFile(filepath):
 if __name__ == "__main__":
 
   # create Spark context with Spark configuration
-  conf = SparkConf().setAppName("subdomain_40_f")
+  conf = SparkConf().setAppName("subdomain_100")
   sc = SparkContext(conf=conf)
 
   #inputFile="hdfs://babar.es.its.nyu.edu:8020/user/yl7280/2007.asc"
@@ -125,8 +125,8 @@ if __name__ == "__main__":
   #inputFile2="hdfs://babar.es.its.nyu.edu:8020/user/yl7280/dataMedium/2015"
   inputFile="hdfs://babar.es.its.nyu.edu:8020/user/yl7280/data_full/data07"
   inputFile2="hdfs://babar.es.its.nyu.edu:8020/user/yl7280/data_full/data15"
-  outputFile1="subdomain_40_f/2007"
-  outputFile2="subdomain_40_f/2015"
+  outputFile1="subdomain_100/2007"
+  outputFile2="subdomain_100/2015"
   points1 = sc.textFile(inputFile)
   points2 = sc.textFile(inputFile2)
   # RDD1&RDD2: map each point to the voxel that contains it and then group voxel into subdomains with buffer
